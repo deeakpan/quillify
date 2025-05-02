@@ -26,6 +26,19 @@ export default function PublishPage() {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const bookInputRef = useRef<HTMLInputElement>(null);
 
+  // Supported file formats for book uploads
+  const supportedBookFormats = [
+    'application/pdf', 
+    'text/plain',
+    'application/msword', 
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/epub+zip',
+    'application/rtf',
+    'text/markdown'
+  ];
+  
+  const supportedBookExtensions = '.pdf, .txt, .doc, .docx, .epub, .rtf, .md';
+
   const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -41,12 +54,17 @@ export default function PublishPage() {
   const handleBookFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type === 'application/pdf' || file.type === 'text/plain') {
+      if (supportedBookFormats.includes(file.type) || 
+          supportedBookExtensions.split(', ').some(ext => file.name.toLowerCase().endsWith(ext.substring(1)))) {
         setFormData(prev => ({ ...prev, bookFile: file }));
+        // Clear any previous error messages
+        if (uploadStatus.type === 'error' && uploadStatus.message.includes('Please upload')) {
+          setUploadStatus({ type: null, message: '' });
+        }
       } else {
         setUploadStatus({
           type: 'error',
-          message: 'Please upload a PDF or TXT file'
+          message: `Please upload a supported format: ${supportedBookExtensions}`
         });
       }
     }
@@ -281,7 +299,7 @@ export default function PublishPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-lg font-medium text-[#d4af37] mb-2">Copies (M 500)</label>
+                  <label className="block text-lg font-medium text-[#d4af37] mb-2">Copies (Max 500)</label>
                   <input 
                     type="number" 
                     name="copies" 
@@ -325,8 +343,10 @@ export default function PublishPage() {
               </div>
               
               <div>
-                <label className="block text-lg font-medium text-[#d4af37] mb-2">Book File (PDF or TXT)</label>
-                <div className="mt-1">
+                <label className="block text-lg font-medium text-[#d4af37] mb-2">
+                  Book File
+                </label>
+                <div className="mt-1 flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={() => bookInputRef.current?.click()}
@@ -339,13 +359,25 @@ export default function PublishPage() {
                     type="file" 
                     ref={bookInputRef}
                     onChange={handleBookFileChange}
-                    accept=".pdf,.txt" 
+                    accept={supportedBookExtensions}
                     className="hidden" 
                   />
                   {formData.bookFile && (
-                    <span className="ml-4 text-lg text-[#d4af37]">{formData.bookFile.name}</span>
+                    <div className="flex items-center bg-gray-800 px-3 py-2 rounded-md">
+                      <span className="text-lg text-[#d4af37] truncate max-w-xs">{formData.bookFile.name}</span>
+                      <button 
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, bookFile: null }))}
+                        className="ml-2 text-[#d4af37] hover:text-[#d4af37]/80"
+                      >
+                        <FiX size={18} />
+                      </button>
+                    </div>
                   )}
                 </div>
+                <p className="mt-2 text-sm text-[#d4af37]/70">
+                  Supported formats: PDF, TXT, DOC, DOCX, EPUB, RTF, Markdown
+                </p>
               </div>
 
               {uploadStatus.message && (
@@ -431,6 +463,11 @@ export default function PublishPage() {
                       <p className="text-sm font-semibold text-white">{formData.price} USDC</p>
                     </div>
                   </div>
+                  
+                  <div>
+                    <p className="text-xs text-gray-400 font-medium">FILE</p>
+                    <p className="text-sm font-semibold text-white truncate">{formData.bookFile?.name}</p>
+                  </div>
                 </div>
               </div>
               
@@ -468,4 +505,4 @@ export default function PublishPage() {
       )}
     </div>
   );
-} 
+}

@@ -390,7 +390,7 @@ export default function ShelfPage() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder={isMobile ? "Search..." : "Search in book..."}
                       className={`${
-                        isMobile ? 'w-24' : 'flex-1'
+                        isMobile ? 'w-30' : 'flex-1'
                       } bg-gray-900 text-white px-3 py-2 rounded-md border border-[#d4af37] focus:outline-none focus:ring-1 focus:ring-[#d4af37]`}
                     />
                   )}
